@@ -119,6 +119,20 @@ def mosaic_by_date(img_list):
 forest = mosaic_by_date(ee.List(forest_list))
 
 
+ds = (
+    xr.open_dataset(
+        forest,
+        engine="ee",
+        crs=proj,
+        scale=scale,
+        geometry=grid_i[0],
+    )
+    .astype("b")
+    .rename({"lon": "longitude", "lat": "latitude"})
+    .rename({"sum": "forest_cover"})
+)
+
+
 def write_geotiff(index, extent):
     """Write geotiff."""
 

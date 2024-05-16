@@ -6,9 +6,7 @@ https://gist.github.com/GerardoLopez/35123d4a15aa31f3ea4b01efb5b26d4d
 
 import os
 
-from osgeo import gdal, osr
-
-
+from osgeo import gdal, osr, gdal_array
 def get_dst_dataset(dst_img, cols, rows, layers, dtype, proj, gt):
     """
     Create a GDAL data set in Cloud Optimized GeoTIFF (COG) format
@@ -109,11 +107,10 @@ def save_xarray(xarray, data_var, fname, index):
     proj = srs.ExportToWkt()
 
     # Get GDAL datatype from NumPy datatype
-    # if _xarray.dtype == 'bool':
-    #     dtype = gdal.GDT_Byte
-    # else:
-    #     dtype = gdal_array.NumericTypeCodeToGDALTypeCode(_xarray.dtype)
-    dtype = gdal.GDT_Byte
+    if _xarray.dtype == 'bool':
+        dtype = gdal.GDT_Byte
+    else:
+        dtype = gdal_array.NumericTypeCodeToGDALTypeCode(_xarray.dtype)
 
     # File name with postfix
     postfix = f"{index}"

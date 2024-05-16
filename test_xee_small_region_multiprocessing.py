@@ -119,18 +119,19 @@ def mosaic_by_date(img_list):
 forest = mosaic_by_date(ee.List(forest_list))
 
 
-ds = (
-    xr.open_dataset(
-        forest,
-        engine="ee",
-        crs=proj,
-        scale=scale,
-        geometry=grid_i[0],
-    )
-    .astype("b")
-    .rename({"lon": "longitude", "lat": "latitude"})
-    .rename({"sum": "forest_cover"})
-)
+# ds = (
+#     xr.open_dataset(
+#         forest,
+#         engine="ee",
+#         crs=proj,
+#         scale=scale,
+#         chunks={},
+#         geometry=grid_i[0],
+#     )
+#     .astype("b")
+#     .rename({"lon": "longitude", "lat": "latitude"})
+#     .rename({"sum": "forest_cover"})
+# )
 
 
 def write_geotiff(index, extent):
@@ -164,15 +165,17 @@ args = [(i, ext) for (i, ext) in enumerate(grid_i)]
 pool.starmap_async(write_geotiff, args).get()
 pool.close()
 pool.join()
-print("--- %s seconds ---" % (time.time() - start_time))
+stop_time = time.time()
+print("--- %s seconds ---" % (stop_time - start_time))
 
 # Make vrt
 tif_forest_files = glob("outputs/forest_" + iso + "*.tif")
 # Callback
 verbose = True
 cback = gdal.TermProgress if verbose else 0
-gdal.BuildVRT("outputs/forest.vrt",
+vrt_dataset = gdal.BuildVRT("outputs/forest.vrt",
               tif_forest_files,
               callback=cback)
+vrt_dataset.FlushCache()
 
 # End Of File

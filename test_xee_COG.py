@@ -4,19 +4,21 @@ import ee
 import xarray as xr
 import pandas as pd
 import rioxarray
-import forestatrisk as far
+from geefcc.download_gadm import download_gadm
+from geefcc.get_vector_extent import get_vector_extent
 from dask.distributed import LocalCluster, Client
 
 #from xarray2geotiff import save_xarray
 
-iso3 = "COD"
+iso3 = "PER"
 years = [2000, 2005, 2010, 2015, 2020]
 
 ee.Initialize(project="forestatrisk",
               opt_url="https://earthengine-highvolume.googleapis.com")
 
-far.data.download.download_gadm(iso3, output_dir="data")
-extent_latlong = far.extent_shp(f"data/gadm36_{iso3}_1.shp")
+ofile = f"data/gadm41_{iso3}_0.gpkg"
+download_gadm(iso3, output_file=ofile)
+extent_latlong = get_vector_extent(ofile)
 
 # Region
 region = ee.Geometry.Rectangle(extent_latlong,
